@@ -5,12 +5,15 @@
             [com.biffweb.examples.electric.home :as home]
             [com.biffweb.examples.electric.worker :as worker]
             [com.biffweb.examples.electric.schema :as schema]
+            [clojure.string :as str]
             [clojure.test :as test]
             [clojure.tools.logging :as log]
             [clojure.tools.namespace.repl :as tn-repl]
             [malli.core :as malc]
             [malli.registry :as malr]
-            [nrepl.cmdline :as nrepl-cmd]))
+            [nrepl.cmdline :as nrepl-cmd]
+            [shadow.cljs.devtools.server :as shadow-server]
+            [shadow.cljs.devtools.api :as shadow-api]))
 
 (def plugins
   [app/plugin
@@ -24,8 +27,18 @@
              ["" {:middleware [biff/wrap-api-defaults]}
               (keep :api-routes plugins)]])
 
+;; The Electric lib includes a resource at /public/index.html, perhaps by
+;; accident, which takes precedence over our Reitit routes.
+(defn wrap-workaround-index-thing [handler]
+  (fn [req]
+    (if (#{"/" "/index.html"} (:uri req))
+      {:status 303
+       :headers {"location" "/home/"}}
+      (handler req))))
+
 (def handler (-> (biff/reitit-handler {:routes routes})
-                 biff/wrap-base-defaults))
+                 biff/wrap-base-defaults
+                 wrap-workaround-index-thing))
 
 (def static-pages (apply biff/safe-merge (map :static plugins)))
 
@@ -57,9 +70,23 @@
 
 (defonce system (atom {}))
 
+(defn use-shadow-cljs [{:keys [shadow-cljs/mode] :as ctx}]
+  (let [version (str (random-uuid))]
+    (shadow-server/start!)
+    (if (= mode :dev)
+      (do
+        (shadow-api/watch :dev)
+        (update ctx :biff/stop conj #(shadow-server/stop!)))
+      (do
+        (shadow-api/release
+         :prod {:config-merge [{:closure-defines {'hyperfiddle.electric-client/VERSION version}}]})
+        (shadow-server/stop!)
+        (assoc ctx :shadow-cljs/version version)))))
+
 (def components
   [biff/use-config
    biff/use-secrets
+   use-shadow-cljs
    biff/use-xt
    biff/use-queues
    biff/use-tx-listener

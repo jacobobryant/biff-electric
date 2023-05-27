@@ -2,7 +2,8 @@
   (:require [com.biffweb.examples.electric :as main]
             [com.biffweb :as biff :refer [q]]
             [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [xtdb.api :as xt]))
 
 (defn get-context []
   (biff/assoc-db @main/system))

@@ -25,20 +25,23 @@
         :recaptcha/secret-key "RECAPTCHA_SECRET_KEY"
         :biff.beholder/enabled false
         :biff.middleware/cookie-secret "COOKIE_SECRET"
-        :biff/jwt-secret "JWT_SECRET"}
+        :biff/jwt-secret "JWT_SECRET"
+        :shadow-cljs/mode :prod}
  :dev {:merge [:prod]
        :biff.beholder/enabled true
        :biff/host "0.0.0.0"
        :biff/port 8080
        :biff/base-url "http://localhost:8080"
        :biff.xtdb/topology :standalone
-       :biff.middleware/secure false}
+       :biff.middleware/secure false
+       :shadow-cljs/mode :dev}
  :tasks {;; Set this if the auto-detection doesn't work. See
          ;; https://github.com/tailwindlabs/tailwindcss/releases/latest
          ;; for possible values (for example: "tailwindcss-macos-arm64").
          :biff.tasks/tailwind-file nil
          :biff.tasks/clj-args ["-J-XX:-OmitStackTraceInFastThrow"
                                "-J-XX:+CrashOnOutOfMemoryError"
+                               "-J-Xss2m"
                                "-J-Duser.timezone=UTC"
                                "-M" "-m" "com.biffweb.examples.electric"
                                "--port" "7888"

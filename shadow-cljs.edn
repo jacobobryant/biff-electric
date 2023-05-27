@@ -1,0 +1,17 @@
+{:nrepl {:port 9001}
+ :builds
+ {:dev {:target :browser
+        :devtools {:watch-dir "target/resources/public"
+                   :hud #{:errors :progress}
+                   :ignore-warnings true}
+        :output-dir "target/resources/public/js"
+        :asset-path "/js"
+        :modules {:main {:entries [com.biffweb.examples.electric.app]
+                         :init-fn com.biffweb.examples.electric.app/start!}}}
+  :prod {:target :browser
+         :output-dir "target/resources/public/js"
+         :asset-path "/js"
+         :module-hash-names true
+         :compiler-options {:optimizations :advanced}
+         :modules {:main {:entries [com.biffweb.examples.electric.app]
+                          :init-fn com.biffweb.examples.electric.app/start!}}}}}

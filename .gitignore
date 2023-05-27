@@ -10,3 +10,4 @@
 .clj-kondo/
 .lsp/
 .portal/
+.shadow-cljs/

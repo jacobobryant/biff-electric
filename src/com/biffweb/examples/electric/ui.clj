@@ -3,6 +3,8 @@
             [clojure.java.io :as io]
             [com.biffweb.examples.electric.settings :as settings]
             [com.biffweb :as biff]
+            [clojure.edn :as edn]
+            [clojure.string :as str]
             [ring.middleware.anti-forgery :as csrf]))
 
 (defn css-path []
@@ -10,7 +12,21 @@
     (str "/css/main.css?t=" (.lastModified f))
     "/css/main.css"))
 
-(defn base [{:keys [::recaptcha] :as ctx} & body]
+(def manifest-path "public/js/manifest.edn")
+
+(defn get-modules []
+  (when-let [manifest (io/resource manifest-path)]
+    (let [manifest-folder (when-let [folder-name (second (rseq (str/split manifest-path #"\/")))]
+                            (str "/" folder-name "/"))]
+      (->> (slurp manifest)
+        (edn/read-string)
+        (reduce (fn [r module] (assoc r (keyword "hyperfiddle.client.module" (name (:name module))) (str manifest-folder (:output-name module)))) {})))))
+
+(defn electric-script []
+  (when-some [{:keys [hyperfiddle.client.module/main]} (get-modules)]
+    [:script {:type "text/javascript" :src main}]))
+
+(defn base [{:keys [::recaptcha ::electric] :as ctx} & body]
   (apply
    biff/base-html
    (-> ctx
@@ -28,7 +44,9 @@
                                        [:script {:src "https://www.google.com/recaptcha/api.js"
                                                  :async "async" :defer "defer"}])]
                                     head))))
-   body))
+   (concat body
+           (when electric
+             [(electric-script)]))))
 
 (defn page [ctx & body]
   (base

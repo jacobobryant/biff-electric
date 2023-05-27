@@ -2,4 +2,10 @@
  :deps {com.biffweb/biff {:git/url "https://github.com/jacobobryant/biff", :sha "df935d8", :tag "v0.7.5"}
         camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
         org.clojure/clojure {:mvn/version "1.11.1"}
-        org.slf4j/slf4j-simple {:mvn/version "2.0.0-alpha5"}}}
+        org.slf4j/slf4j-simple {:mvn/version "2.0.0-alpha5"}
+
+        com.hyperfiddle/electric {:mvn/version "v2-alpha-338-geec2f3df"}
+        org.clojure/clojurescript {:mvn/version "1.11.60"}
+
+        binaryage/devtools {:mvn/version "1.0.6"}
+        thheller/shadow-cljs {:mvn/version "2.20.1"}}}
